@@ -6,66 +6,121 @@
 
 using namespace std;
 
-// Function to check if the player has guessed all the letters
-bool isWordGuessed(const string& secretWord, const string& guessedWord) {
-    return secretWord == guessedWord;
+vector<string> kumpulanNama ={
+                            "hansdika", "robih", "nabil", "kemal", "ale",
+                            "beni", "tegar", "nafal", "faita", "rizqi",
+                            "sultan", "hasbi", "fathur", "noval", "reza",
+                            "faizun", "yudha", "michael", "asyraf", "harza",
+                            "farid", "rizal", "faishal", "syafiq", "jeje",
+                            "andra", "fauzan", "ali", "yadhit", "doni"
+                            };
+const int nyawa= 6;
+bool mainLagi = true;
+char cekUlang = '-';
+int salah;
+string namaRahasia;
+
+string namaRandom() {
+    srand(static_cast<unsigned int>(time(nullptr)));
+    int randomIndex = rand() % kumpulanNama.size();
+    return kumpulanNama[randomIndex];
 }
 
-// Function to display the current state of the secret word with guessed letters
-void displayWord(const string& word, const string& guessedLetters) {
-    for (char letter : word) {
-        if (guessedLetters.find(letter) != string::npos) {
-            cout << letter;
-        } else {
-            cout << "_";
-        }
+bool tertebak(const string& nama, const string& tebakan) {
+    return nama == tebakan;
+}
+
+void displayNama(const string& tebakan) {
+    cout << endl << "Nama : ";
+    for (char huruf : tebakan) {
+        cout << huruf << " ";
     }
     cout << endl;
 }
 
-int main() {
-    vector<string> words = {"apple", "banana", "cherry", "orange", "strawberry"};
-    srand(static_cast<unsigned int>(time(nullptr)));
-    int randomIndex = rand() % words.size();
-    string secretWord = words[randomIndex];
-    string guessedLetters;
-    int maxAttempts = 6;
-    int attempts = 0;
-
-    cout << "Welcome to Hangman!" << endl;
-    cout << "Try to guess the secret word." << endl;
-
-    while (attempts < maxAttempts) {
-        cout << "Guessed letters: " << guessedLetters << endl;
-        displayWord(secretWord, guessedLetters);
-
-        char guess;
-        cout << "Enter a letter: ";
-        cin >> guess;
-
-        if (guessedLetters.find(guess) != string::npos) {
-            cout << "You've already guessed that letter." << endl;
-            continue;
+void perulangan() {
+    while (cekUlang != 'y' && cekUlang != 't') {
+        cout << "Apakah kamu ingin main lagi ?  (y/t)" << endl;
+        cin >> cekUlang;
+        if (cekUlang == 'y') {
+            mainLagi = true;
+        } else if (cekUlang == 't'){
+            mainLagi = false;
+        }else{
+            cout << "Input 'y' untuk mengulang permainan atau 't' untuk keluar dari permainan.";
         }
+    }
+}
 
-        guessedLetters += guess;
+void kalimatTemplate(string kalimat){
+    if(kalimat == "welcome"){
+        system("CLS");
+        cout << endl;
+        cout << "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+" << endl;
+        cout << "| Selamat datang di tebak nama GT B 11 !!! (Hangman Game) |" << endl;
+        cout << "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+" << endl;
+    }else if (kalimat == "tebak"){
+        cout << "Tebak satu huruf : ";
+    }else if (kalimat == "salah"){
+        cout << "Tebakan salah! Nyawa tersisa: " << nyawa - salah << endl;
+    }else if (kalimat == "menang"){
+        cout << "Selamat! Kamu berhasil menebak nama: " << namaRahasia << endl << endl;
+    }else if (kalimat == "kalah"){
+        cout << "Ah payah, kamu kehabisan nyawa. Nama rahasia adalah: " << namaRahasia << endl << endl;
+    }else if (kalimat == "goodbye"){
+        system("CLS");
+        cout << endl;
+        cout << "Terimakasih sudah bermain! GT B itu 'B' nya berarti Bahagia loh!" << endl;
+    }
+}
 
-        if (secretWord.find(guess) != string::npos) {
-            cout << "Correct guess!" << endl;
-            if (isWordGuessed(secretWord, guessedLetters)) {
-                cout << "Congratulations! You've guessed the word: " << secretWord << endl;
+int main() {
+
+    while(mainLagi){
+        //inisialisasi awal game
+        namaRahasia = namaRandom();
+        string papanSoal(namaRahasia.length(), '_');
+        salah = 0;
+        cekUlang = '-';
+
+        kalimatTemplate("welcome");
+
+        while (salah < nyawa) {
+            //perulangan permainan
+            displayNama(papanSoal);
+
+            char tebak;
+            kalimatTemplate("tebak");
+            cin >> tebak;
+
+            bool ketemu = false;
+            for (int i = 0; i < namaRahasia.length(); ++i) {
+                if (namaRahasia[i] == tebak) {
+                    papanSoal[i] = tebak;
+                    ketemu = true;
+                }
+            }
+
+            if (!ketemu) {
+                ++salah;
+                kalimatTemplate("salah");
+            }
+
+            if (tertebak(namaRahasia, papanSoal)) {
+                displayNama(papanSoal);
+                kalimatTemplate("menang");
                 break;
             }
-        } else {
-            cout << "Incorrect guess." << endl;
-            attempts++;
-            cout << "Attempts left: " << maxAttempts - attempts << endl;
         }
+
+        if (salah == nyawa) {
+            kalimatTemplate("kalah");
+        }
+
+        perulangan();
     }
 
-    if (attempts >= maxAttempts) {
-        cout << "You ran out of attempts. The secret word was: " << secretWord << endl;
-    }
+    kalimatTemplate("goodbye");
 
     return 0;
 }
